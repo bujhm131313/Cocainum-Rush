@@ -5,6 +5,10 @@ import arcade
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
 
+RUSH_THRESHOLD = 100
+DEATH_THRESHOLD = 10000
+
+
 JUMP_SPEED = 65
 MOVEMENT_SPEED = 15
 SPRITE_SCALING_COIN = 0.2
@@ -40,9 +44,16 @@ class MyGame(arcade.Window):
         self.player_sprite.center_x = 0  # Стартовая позиция
         self.player_sprite.center_y = 0
         self.player_sprite.height = 100
-        self.player_sprite.width = 70
+        self.player_sprite.width = 80
         self.player_list.append(self.player_sprite)
 
+        self._add_cocainum()
+        self._draw_walls()
+
+        self.physics_engine = arcade.PhysicsEnginePlatformer(
+            self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
+
+    def _add_cocainum(self):
         # Создать монетки
         for i in range(COIN_COUNT):
             # Создать инстанс монеток
@@ -56,14 +67,11 @@ class MyGame(arcade.Window):
             # Добавить монетку к списку
             self.coin_list.append(coin)
 
-        self._draw_walls()
-
-        self.physics_engine = arcade.PhysicsEnginePlatformer(
-            self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
-
-
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
+        if self.score > DEATH_THRESHOLD:
+            # You died and cannot move
+            return
 
         if key == arcade.key.UP:
             self.player_sprite.change_y = JUMP_SPEED
@@ -76,7 +84,6 @@ class MyGame(arcade.Window):
 
     def on_key_release(self, key, modifiers):
         """Вызывается, когда пользователь отпускает клавишу"""
-
         if key == arcade.key.UP or key == arcade.key.DOWN:
             self.player_sprite.change_y = 0
         elif key == arcade.key.LEFT or key == arcade.key.RIGHT:
@@ -89,6 +96,12 @@ class MyGame(arcade.Window):
         self.wall_list.draw()
         self.player_list.draw()
         text = arcade.draw_text('score: {}'.format(self.score), 30, 800, color=arcade.color.RED_DEVIL, font_size=70)
+        if self.score > DEATH_THRESHOLD:
+            arcade.draw_text('COCAINUM OVERDOSE', 300, 500,
+                             color=arcade.color.RED_DEVIL, font_size=70)
+        elif self.score > RUSH_THRESHOLD:
+            arcade.draw_text('COCAINUM RUSH', 300, 500,
+                             color=arcade.color.RED_DEVIL, font_size=70)
 
     def update(self, delta_time):
         coins_hit_list = arcade.check_for_collision_with_list(
@@ -99,10 +112,9 @@ class MyGame(arcade.Window):
             self.score += 1
 
         self.physics_engine.update()
+        if 0 < self.score < DEATH_THRESHOLD and self.score % COIN_COUNT == 0:
+            self._add_cocainum()
 
-        if self.score == COIN_COUNT:
-            arcade.draw_text('GAME OVER YOU LOST', 500, 500,
-                             color=arcade.color.RED_DEVIL, font_size=70)
 
     def _draw_walls(self):
         for x in range(-2000, 2000, 50):
