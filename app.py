@@ -16,6 +16,7 @@ SPRITE_SCALING_PLAYER = 0.2
 SPRITE_SCALING = 0.2
 COIN_COUNT = 10
 GRAVITY = 5
+HALLUCINATION_POWER = 0.02
 
 
 class MyGame(arcade.Window):
@@ -25,6 +26,7 @@ class MyGame(arcade.Window):
         super().__init__(width, height)
 
         arcade.set_background_color(arcade.color.BLUE_GRAY)
+        self.frame_counter = 0
 
     def setup(self):
         """ Настроить игру и инициализировать переменные. """
@@ -49,6 +51,7 @@ class MyGame(arcade.Window):
 
         self._add_cocainum()
         self._draw_walls()
+        self._draw_hallucination()
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
@@ -91,10 +94,16 @@ class MyGame(arcade.Window):
 
     def on_draw(self):
         """ Отрендерить этот экран. """
+        self.frame_counter += 1
+
         arcade.start_render()
         self.coin_list.draw()
         self.wall_list.draw()
         self.player_list.draw()
+
+        self._generate_hallucination()
+        self.hallucation.draw()
+
         text = arcade.draw_text('score: {}'.format(self.score), 30, 800, color=arcade.color.RED_DEVIL, font_size=70)
         if self.score > DEATH_THRESHOLD:
             arcade.draw_text('COCAINUM OVERDOSE', 300, 500,
@@ -146,6 +155,27 @@ class MyGame(arcade.Window):
             wall.center_x = x
             wall.center_y = 800
             self.wall_list.append(wall)
+
+    def _draw_hallucination(self):
+        self.hallucation = arcade.Sprite("img/catdrugs.jpg", 3)
+        self.hallucation.alpha = 0
+        self.hallucation.center_x = SCREEN_WIDTH / 2
+        self.hallucation.center_y = SCREEN_HEIGHT / 2
+
+    def _generate_hallucination(self):
+        INTERVAL = 400
+        ANGLE_SPEED_K = 4
+        HALLUCINATION_SIZE_SPEED_K = 5
+
+        x = self.frame_counter % INTERVAL
+        delta = random.random() if x > INTERVAL / 2 else -random.random()
+        self.hallucation.center_x += delta
+        delta = random.random() if x < INTERVAL / 2 else -random.random()
+        self.hallucation.center_y += delta
+        self.hallucation._angle += delta / ANGLE_SPEED_K
+        self.hallucation.width += delta * HALLUCINATION_SIZE_SPEED_K
+        self.hallucation.height -= delta * HALLUCINATION_SIZE_SPEED_K
+        self.hallucation.alpha = self.score * HALLUCINATION_POWER
 
 
 def main():
