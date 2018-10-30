@@ -4,6 +4,7 @@ import arcade
 
 SCREEN_WIDTH = 1500
 SCREEN_HEIGHT = 900
+WALL_SIZE = 50
 
 RUSH_THRESHOLD = 100
 DEATH_THRESHOLD = 10000
@@ -31,24 +32,23 @@ class MyGame(arcade.Window):
 
         # Создать список спрайтов
         self.player_list = arcade.SpriteList()
-        self.coin_list = arcade.SpriteList()
+        self.cocainum_list = arcade.SpriteList()
         self.wall_list = arcade.SpriteList()
+
+        self._add_cocainum()
+        self._draw_walls()
 
         # Счет
         self.score = 0
 
-        # Задать игрока и
-        # Его изображение из kenney.nl
+        # Задать игрока и его изображение
         self.player_sprite = arcade.Sprite("img/character.png",
                                            SPRITE_SCALING_PLAYER)
-        self.player_sprite.center_x = 0  # Стартовая позиция
-        self.player_sprite.center_y = 0
+        self.player_sprite.center_x = 100  # Стартовая позиция
+        self.player_sprite.center_y = 100 
         self.player_sprite.height = 100
         self.player_sprite.width = 80
         self.player_list.append(self.player_sprite)
-
-        self._add_cocainum()
-        self._draw_walls()
 
         self.physics_engine = arcade.PhysicsEnginePlatformer(
             self.player_sprite, self.wall_list, gravity_constant=GRAVITY)
@@ -65,7 +65,7 @@ class MyGame(arcade.Window):
             coin.center_y = random.randrange(100, SCREEN_HEIGHT)
 
             # Добавить монетку к списку
-            self.coin_list.append(coin)
+            self.cocainum_list.append(coin)
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
@@ -92,7 +92,7 @@ class MyGame(arcade.Window):
     def on_draw(self):
         """ Отрендерить этот экран. """
         arcade.start_render()
-        self.coin_list.draw()
+        self.cocainum_list.draw()
         self.wall_list.draw()
         self.player_list.draw()
         text = arcade.draw_text('score: {}'.format(self.score), 30, 800, color=arcade.color.RED_DEVIL, font_size=70)
@@ -105,7 +105,7 @@ class MyGame(arcade.Window):
 
     def update(self, delta_time):
         coins_hit_list = arcade.check_for_collision_with_list(
-            self.player_sprite, self.coin_list)
+            self.player_sprite, self.cocainum_list)
 
         for coin in coins_hit_list:
             coin.kill()
@@ -117,31 +117,45 @@ class MyGame(arcade.Window):
 
 
     def _draw_walls(self):
-        for x in range(-2000, 2000, 50):
-            wall = arcade.Sprite("img/wall.png", SPRITE_SCALING)
-            wall.center_x = x
-            wall.center_y = 0
-            self.wall_list.append(wall)
+        # create box
+        for x in range(0, SCREEN_WIDTH + WALL_SIZE, WALL_SIZE):
+            bottom_border = arcade.Sprite("img/wall.png", SPRITE_SCALING)
+            top_border = arcade.Sprite("img/wall.png", SPRITE_SCALING)
+            bottom_border.center_x = top_border.center_x = x
+            bottom_border.center_y = 0
+            top_border.center_y = SCREEN_HEIGHT
+            self.wall_list.append(bottom_border)
+            self.wall_list.append(top_border)
 
-        for x in range(-1900, 2000, 200):
+        for y in range(0, SCREEN_HEIGHT + WALL_SIZE, WALL_SIZE):
+            left_border = arcade.Sprite("img/wall.png", SPRITE_SCALING)
+            right_border = arcade.Sprite("img/wall.png", SPRITE_SCALING)
+            left_border.center_y = right_border.center_y = y
+            left_border.center_x = 0
+            right_border.center_x = SCREEN_WIDTH
+            self.wall_list.append(left_border)
+            self.wall_list.append(right_border)
+
+        # Put layers
+        for x in range(0, SCREEN_WIDTH, 200):
             wall = arcade.Sprite("img/wall.png", SPRITE_SCALING)
             wall.center_x = x
             wall.center_y = 200
             self.wall_list.append(wall)
 
-        for x in range(-2000, 2000, 200):
+        for x in range(100, SCREEN_WIDTH, 200):
             wall = arcade.Sprite("img/wall.png", SPRITE_SCALING)
             wall.center_x = x
             wall.center_y = 400
             self.wall_list.append(wall)
 
-        for x in range(-2000, 2000, 200):
+        for x in range(100, SCREEN_WIDTH, 200):
             wall = arcade.Sprite("img/wall.png", SPRITE_SCALING)
             wall.center_x = x
             wall.center_y = 600
             self.wall_list.append(wall)
 
-        for x in range(-1900, 2000, 200):
+        for x in range(0, SCREEN_WIDTH, 200):
             wall = arcade.Sprite("img/wall.png", SPRITE_SCALING)
             wall.center_x = x
             wall.center_y = 800
