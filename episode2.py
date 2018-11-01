@@ -120,7 +120,7 @@ class NewGame(arcade.Window):
             self.drugs.append(drug)
 
         if len(self.healthy_food) < 3 and random.randint(0, 100) < 5:
-            food = arcade.Sprite("img/wall.png", SPRITE_SCALING)
+            food = arcade.Sprite("img/Broccoli.png", SPRITE_SCALING)
             food.velocity = random.randint(15, 30) * g
             food.center_x = random.randint(0, self.width)
             food.center_y = random.randint(self.height - 100, self.height)
