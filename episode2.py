@@ -98,7 +98,7 @@ class NewGame(arcade.Window):
                 self.hp = max(0, self.hp - 1)
                 food.kill()
 
-        if self.is_running and self.hp == 0 or self.time_left == 0:
+        if self.is_running and (self.hp == 0 or self.time_left == 0):
             self.is_running = False
             if self.hp > 1:
                 self.score *= self.hp
